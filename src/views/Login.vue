@@ -1,11 +1,11 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300">
-    <div class="bg-white p-10 rounded-2xl shadow-xl w-96 flex flex-col items-center">
-      <h1 class="text-3xl font-extrabold text-blue-700 mb-8">後台登入</h1>
+  <div class="flex items-center justify-center min-h-screen bg-gray-50">
+    <div class="bg-white rounded-3xl shadow-lg w-96 p-10 flex flex-col items-center">
+      <h1 class="text-3xl font-semibold text-gray-800 mb-8">後台登入</h1>
 
       <button
         @click="loginWithGoogle"
-        class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 hover:shadow-lg transition-all duration-300"
+        class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-colors duration-200"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.3 0 6 1.1 7.8 2.1l5.7-5.7C33.1 3.1 28.9 1 24 1 14.7 1 7.1 6.9 4.3 15.2l6.6 5.1C12.7 14 17.9 9.5 24 9.5z"/>
@@ -30,10 +30,8 @@ const loginWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
     const result = await signInWithPopup(auth, provider);
-    console.log("登入成功:", result.user.email);
-    router.push('/dashboard');
+    router.push("/dashboard");
   } catch (err) {
-    console.error("登入錯誤:", err);
     alert("登入失敗: " + err.message);
   }
 };
