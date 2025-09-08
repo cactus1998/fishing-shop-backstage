@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory  } from "vue-router";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { signOut, onAuthStateChanged } from "firebase/auth";
@@ -13,7 +13,7 @@ const routes = [
 const base = import.meta.env.MODE === "development" ? "/" : "/fishing-shop-backstage/";
 
 const router = createRouter({
-  history: createWebHistory(base),
+  history: createWebHashHistory(base),
   routes,
 });
 
