@@ -8,7 +8,7 @@
 
 一個以 **Vue 3 + Vite** 建置的一頁式前端專案範本，整合 Element Plus、TailwindCSS、Pinia 及 Firebase（Realtime DB）等常用套件，提供購物 / 商品瀏覽類型的畫面與互動基礎。
 
-## 專案技術（依 `package.json`）
+## 專案技術
 
 - Vue v3.5.18  
 - Vite v7.1.2  
@@ -48,7 +48,7 @@ npm run preview
 - `build`：`vite build`  
 - `preview`：`vite preview`
 
-## 注意事項 / 小提醒
+## 注意事項
 
 - 若要使用 Firebase 的 Realtime Database，請記得建立 `sdk.js` 或相應的環境設定，並在 `.env` / 設定檔中放入 API keys（不要直接推到公開 repo）。  
 - 若要在 CI 或部署平台上運行，請確認平台的 Node 版本是否與本專案相容（建議至少與 badge 指定版本一致）。
