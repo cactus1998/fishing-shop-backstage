@@ -1,9 +1,7 @@
-import { createRouter, createWebHashHistory  } from "vue-router";
-import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { createRouter, createWebHashHistory } from "vue-router";
+import { auth } from "../firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
-// 路由設定
 const routes = [
   { path: "/login", component: () => import("../views/Login.vue") },
   { path: "/dashboard", component: () => import("../views/Dashboard.vue"), meta: { requiresAuth: true } },
@@ -17,24 +15,41 @@ const router = createRouter({
   routes,
 });
 
-// 🔥 新增：在 Firebase 身份驗證狀態變動時，主動檢查並導航
+// 🔥 Firebase 登入狀態監聽（僅驗證 Token）
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // 如果使用者已登入，檢查白名單
-    const email = (user.email || "").toLowerCase().trim();
-    const snap = await getDoc(doc(db, "allowlist", email));
+    // ✅ 儲存 token
+    const token = user.accessToken || (await user.getIdToken());
+    localStorage.setItem("authToken", token);
 
-    // 如果使用者在白名單內，且當前不在 dashboard 頁面，就導向 dashboard
-    if (snap.exists() && router.currentRoute.value.path !== '/dashboard') {
-      router.push('/dashboard');
+    // 若目前不在 dashboard，自動導向
+    if (router.currentRoute.value.path !== "/dashboard") {
+      router.push("/dashboard");
     }
   } else {
-    // 如果使用者未登入，且當前不在 login 頁面，就導向 login
-    if (router.currentRoute.value.path !== '/login') {
-      router.push('/login');
+    // 未登入 → 清除 token 並導回登入頁
+    localStorage.removeItem("authToken");
+    if (router.currentRoute.value.path !== "/login") {
+      router.push("/login");
     }
   }
 });
 
+// 檢查 token 是否存在
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("authToken");
+
+  // 如果進入需要登入的頁面但沒有 token → 導向登入頁
+  if (to.meta.requiresAuth && !token) {
+    next("/login");
+  } 
+  // 如果已登入但進入登入頁 → 導向 dashboard
+  else if (to.path === "/login" && token) {
+    next("/dashboard");
+  } 
+  else {
+    next();
+  }
+});
 
 export default router;

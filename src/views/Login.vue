@@ -32,16 +32,21 @@ const router = useRouter();
 
 // Google 登入方法
 const loginWithGoogle = async () => {
-  const provider = new GoogleAuthProvider()
-  // 設定參數：強制每次登入都要選帳號（避免自動登入）
-  provider.setCustomParameters({ prompt: "select_account" })
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
 
   try {
-    // 使用 Firebase 提供的 Popup 登入
-    const result = await signInWithPopup(auth, provider)
-    router.push("/dashboard")
+    // 登入 Google
+    const result = await signInWithPopup(auth, provider);
+
+    // 儲存 accessToken 到 localStorage
+    const token = result.user.accessToken || (await result.user.getIdToken());
+    localStorage.setItem("authToken", token);
+
+    // 導向後台
+    router.push("/dashboard");
   } catch (err) {
-    alert("登入失敗: " + err.message)
+    alert("登入失敗: " + err.message);
   }
-}
+};
 </script>

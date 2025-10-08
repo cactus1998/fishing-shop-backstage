@@ -211,11 +211,12 @@ const filteredCompleted = computed(() => filterByName(completedOrders.value));
 // 登出功能
 const logout = async () => {
   try {
-    const auth = getAuth()
-    await signOut(auth)
-    router.push('/login') // 導回登入頁
+    const auth = getAuth();
+    await signOut(auth);
+    localStorage.removeItem("authToken"); // ✅ 清除 token
+    router.push("/login");
   } catch (err) {
-    console.error('登出失敗', err)
+    console.error("登出失敗", err);
   }
-}
+};
 </script>
