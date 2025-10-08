@@ -66,7 +66,7 @@
               <el-button
                 type="primary"
                 class="w-full mt-auto"
-                @click="isGuest ? guestAlert() : markAsShipped(order.id)"
+                @click="isGuest ? showGuestWarning() : markAsShipped(order.id)"
               >
                 送單
               </el-button>
@@ -107,7 +107,7 @@
               <el-button
                 type="success"
                 class="w-full mt-auto"
-                @click="isGuest ? guestAlert() : markAsCompleted(order.id)"
+                @click="isGuest ? showGuestWarning() : markAsCompleted(order.id)"
               >
                 完成付款
               </el-button>
@@ -143,15 +143,6 @@
                   完成日期: {{ order.completedAt?.toDate().toLocaleString() }}
                 </p>
               </div>
-
-              <!-- 完成付款按鈕 (如果你希望完成 Tab 不可編輯也可同樣處理) -->
-              <el-button
-                type="success"
-                class="w-full mt-auto"
-                @click="isGuest ? guestAlert() : null"
-              >
-                已完成
-              </el-button>
             </div>
           </div>
         </el-tab-pane>
@@ -180,6 +171,7 @@ let unsub;
 
 // 判斷是否為訪客
 onMounted(() => {
+  console.log(auth.currentUser);
   if (auth.currentUser) {
     isGuest.value = auth.currentUser.isAnonymous;
   }
@@ -202,7 +194,7 @@ const showGuestWarning = (actionName) => {
     Swal.fire({
       icon: "warning",
       title: "訪客不可操作",
-      text: `訪客身份無法 ${actionName}`,
+      text: `訪客身份無法操作此功能，請使用正式帳號登入。`,
     });
     return true;
   }
