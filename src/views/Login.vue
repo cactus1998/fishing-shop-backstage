@@ -19,34 +19,60 @@
         </svg>
         使用 Google 登入
       </button>
+      <!-- 訪客登入按鈕 -->
+      <button
+        @click="loginAsGuest"
+        class="w-full flex items-center justify-center gap-3 px-6 py-3 mt-4 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-colors duration-200"
+      >
+        以訪客身份登入
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "firebase/auth";
 import { useRouter } from "vue-router";
+import Swal from "sweetalert2";
 
 const auth = getAuth();
 const router = useRouter();
 
-// Google 登入方法
+// Google 登入
 const loginWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
   try {
-    // 登入 Google
     const result = await signInWithPopup(auth, provider);
-
-    // 儲存 accessToken 到 localStorage
     const token = result.user.accessToken || (await result.user.getIdToken());
     localStorage.setItem("authToken", token);
-
-    // 導向後台
     router.push("/dashboard");
   } catch (err) {
-    alert("登入失敗: " + err.message);
+    Swal.fire({
+      icon: "error",
+      title: "登入失敗",
+      text: err.message,
+      confirmButtonColor: "#3085d6",
+    });
+  }
+};
+
+// 訪客登入
+const loginAsGuest = async () => {
+  try {
+    const result = await signInAnonymously(auth);
+    const token = await result.user.getIdToken();
+    localStorage.setItem("authToken", token);
+    router.push("/dashboard");
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "訪客登入失敗",
+      text: err.message,
+      confirmButtonColor: "#3085d6",
+    });
   }
 };
 </script>
+

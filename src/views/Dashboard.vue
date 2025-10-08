@@ -1,8 +1,9 @@
 <template>
   <div class="flex flex-col items-center min-h-screen bg-gray-200 p-6">
 
+    <!-- 頁首 -->
     <div class="flex items-center w-full justify-between mb-10">
-      <div class="w-[90px]"></div> <!-- 寬度跟右側按鈕差不多 -->
+      <div class="w-[90px]"></div>
       <h1 class="text-3xl font-semibold text-gray-800 text-center flex-1">
         後台訂單管理
       </h1>
@@ -16,7 +17,7 @@
       </el-button>
     </div>
 
-    <!-- 最外層卡片 -->
+    <!-- 訂單卡片 -->
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-5xl p-6">
       <!-- 搜尋欄 -->
       <div class="flex justify-end mb-4">
@@ -30,6 +31,7 @@
 
       <!-- Tabs -->
       <el-tabs v-model="activeTab" type="card" class="w-full mb-6">
+        
         <!-- 未送單 -->
         <el-tab-pane label="未送單" name="pending">
           <div v-if="loading" class="text-gray-500 text-center">讀取中...</div>
@@ -40,24 +42,32 @@
             <div
               v-for="order in filteredPending"
               :key="order.id"
-              class="bg-gray-100 rounded-2xl p-5 transition duration-200"
+              class="bg-gray-100 rounded-2xl p-5 flex flex-col justify-between h-full"
             >
-              <p class="text-gray-800 font-medium mb-1">買家: {{ order.customer.name }}</p>
-              <p class="text-gray-800 font-medium mb-1">信箱: {{ order.customer.email }}</p>
-              <p class="text-gray-800 font-medium mb-1">電話: {{ order.customer.phone }}</p>
-              <div class="mb-2">
-                <p class="text-gray-800 font-medium mb-1">商品細項:</p>
-                <ul class="list-disc list-inside text-gray-700 ml-2">
-                  <li v-for="(item, index) in order.items" :key="index">
-                    {{ item.name }} × {{ item.quantity }}
-                  </li>
-                </ul>
+              <div>
+                <p class="text-gray-800 font-medium mb-1">買家: {{ order.customer.name }}</p>
+                <p class="text-gray-800 font-medium mb-1">信箱: {{ order.customer.email }}</p>
+                <p class="text-gray-800 font-medium mb-1">電話: {{ order.customer.phone }}</p>
+                <div class="mb-2">
+                  <p class="text-gray-800 font-medium mb-1">商品細項:</p>
+                  <ul class="list-disc list-inside text-gray-700 ml-2">
+                    <li v-for="(item, index) in order.items" :key="index">
+                      {{ item.name }} × {{ item.quantity }}
+                    </li>
+                  </ul>
+                </div>
+                <p class="text-gray-800 font-medium mb-1">金額: ${{ order.total }}</p>
+                <p class="text-gray-800 mb-4">
+                  日期: {{ order.createdAt?.toDate().toLocaleString() }}
+                </p>
               </div>
-              <p class="text-gray-800 font-medium mb-1">金額: ${{ order.total }}</p>
-              <p class="text-gray-500 text-sm mb-4">
-                日期: {{ order.createdAt?.toDate().toLocaleString() }}
-              </p>
-              <el-button type="primary" class="w-full" @click="markAsShipped(order.id)">
+
+              <!-- 送單按鈕 -->
+              <el-button
+                type="primary"
+                class="w-full mt-auto"
+                @click="isGuest ? guestAlert() : markAsShipped(order.id)"
+              >
                 送單
               </el-button>
             </div>
@@ -73,24 +83,32 @@
             <div
               v-for="order in filteredShipped"
               :key="order.id"
-              class="bg-gray-100 rounded-2xl p-5 transition duration-200"
+              class="bg-gray-100 rounded-2xl p-5 flex flex-col justify-between h-full"
             >
-              <p class="text-gray-800 font-medium mb-1">買家: {{ order.customer.name }}</p>
-              <p class="text-gray-800 font-medium mb-1">信箱: {{ order.customer.email }}</p>
-              <p class="text-gray-800 font-medium mb-1">電話: {{ order.customer.phone }}</p>
-              <div class="mb-2">
-                <p class="text-gray-800 font-medium mb-1">商品細項:</p>
-                <ul class="list-disc list-inside text-gray-700 ml-2">
-                  <li v-for="(item, index) in order.items" :key="index">
-                    {{ item.name }} × {{ item.quantity }}
-                  </li>
-                </ul>
+              <div>
+                <p class="text-gray-800 font-medium mb-1">買家: {{ order.customer.name }}</p>
+                <p class="text-gray-800 font-medium mb-1">信箱: {{ order.customer.email }}</p>
+                <p class="text-gray-800 font-medium mb-1">電話: {{ order.customer.phone }}</p>
+                <div class="mb-2">
+                  <p class="text-gray-800 font-medium mb-1">商品細項:</p>
+                  <ul class="list-disc list-inside text-gray-700 ml-2">
+                    <li v-for="(item, index) in order.items" :key="index">
+                      {{ item.name }} × {{ item.quantity }}
+                    </li>
+                  </ul>
+                </div>
+                <p class="text-gray-800 font-medium mb-1">金額: ${{ order.total }}</p>
+                <p class="text-gray-800 mb-4">
+                  日期: {{ order.createdAt?.toDate().toLocaleString() }}
+                </p>
               </div>
-              <p class="text-gray-800 font-medium mb-1">金額: ${{ order.total }}</p>
-              <p class="text-gray-500 text-sm mb-4">
-                日期: {{ order.createdAt?.toDate().toLocaleString() }}
-              </p>
-              <el-button type="success" class="w-full" @click="markAsCompleted(order.id)">
+
+              <!-- 完成付款按鈕 -->
+              <el-button
+                type="success"
+                class="w-full mt-auto"
+                @click="isGuest ? guestAlert() : markAsCompleted(order.id)"
+              >
                 完成付款
               </el-button>
             </div>
@@ -106,23 +124,34 @@
             <div
               v-for="order in filteredCompleted"
               :key="order.id"
-              class="bg-gray-100 rounded-2xl p-5 duration-200"
+              class="bg-gray-100 rounded-2xl p-5 flex flex-col justify-between h-full"
             >
-              <p class="text-gray-800 font-medium mb-1">買家: {{ order.customer.name }}</p>
-              <p class="text-gray-800 font-medium mb-1">信箱: {{ order.customer.email }}</p>
-              <p class="text-gray-800 font-medium mb-1">電話: {{ order.customer.phone }}</p>
-              <div class="mb-2">
-                <p class="text-gray-800 font-medium mb-1">商品細項:</p>
-                <ul class="list-disc list-inside text-gray-700 ml-2">
-                  <li v-for="(item, index) in order.items" :key="index">
-                    {{ item.name }} × {{ item.quantity }}
-                  </li>
-                </ul>
+              <div>
+                <p class="text-gray-800 font-medium mb-1">買家: {{ order.customer.name }}</p>
+                <p class="text-gray-800 font-medium mb-1">信箱: {{ order.customer.email }}</p>
+                <p class="text-gray-800 font-medium mb-1">電話: {{ order.customer.phone }}</p>
+                <div class="mb-2">
+                  <p class="text-gray-800 font-medium mb-1">商品細項:</p>
+                  <ul class="list-disc list-inside text-gray-700 ml-2">
+                    <li v-for="(item, index) in order.items" :key="index">
+                      {{ item.name }} × {{ item.quantity }}
+                    </li>
+                  </ul>
+                </div>
+                <p class="text-gray-800 font-medium mb-1">金額: ${{ order.total }}</p>
+                <p class="text-gray-800 mb-4">
+                  完成日期: {{ order.completedAt?.toDate().toLocaleString() }}
+                </p>
               </div>
-              <p class="text-gray-800 font-medium mb-1">金額: ${{ order.total }}</p>
-              <p class="text-gray-500 text-sm">
-                完成日期: {{ order.completedAt?.toDate().toLocaleString() }}
-              </p>
+
+              <!-- 完成付款按鈕 (如果你希望完成 Tab 不可編輯也可同樣處理) -->
+              <el-button
+                type="success"
+                class="w-full mt-auto"
+                @click="isGuest ? guestAlert() : null"
+              >
+                已完成
+              </el-button>
             </div>
           </div>
         </el-tab-pane>
@@ -134,49 +163,53 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { db } from "@/firebase";
-import { getAuth, signOut } from 'firebase/auth'
+import { getAuth, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "vue-router";
+import Swal from "sweetalert2";
 
-// Tab 狀態
 const activeTab = ref("pending");
-
-// 搜尋字串
 const searchQuery = ref("");
-
-const router = useRouter();
-
-// 訂單資料
 const orders = ref([]);
 const loading = ref(true);
+const router = useRouter();
+const auth = getAuth();
+const isGuest = ref(false);
 
-// Firestore 即時監聽 orders 集合
 let unsub;
-onMounted(() => {
-  // 元件掛載時開始監聽 Firestore "orders" 集合
-  unsub = onSnapshot(
-    collection(db, "orders"), // 要監聽的集合
-    snapshot => {
-      // snapshot 代表 "orders" 集合的即時資料快照
-      // 轉換成一般陣列格式，附上 doc.id
-      orders.value = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
 
-      // 資料拿到後關閉 loading 狀態
-      loading.value = false;
-    }
-  );
+// 判斷是否為訪客
+onMounted(() => {
+  if (auth.currentUser) {
+    isGuest.value = auth.currentUser.isAnonymous;
+  }
+  auth.onAuthStateChanged(user => {
+    isGuest.value = user?.isAnonymous || false;
+  });
+
+  // Firestore 即時監聽
+  unsub = onSnapshot(collection(db, "orders"), snapshot => {
+    orders.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    loading.value = false;
+  });
 });
 
-onUnmounted(() => 
-  // 元件卸載時停止監聽，避免記憶體洩漏
-  unsub && unsub()
-);
+onUnmounted(() => unsub && unsub());
 
+// 對訪客點擊按鈕時跳出警告
+const showGuestWarning = (actionName) => {
+  if (isGuest.value) {
+    Swal.fire({
+      icon: "warning",
+      title: "訪客不可操作",
+      text: `訪客身份無法 ${actionName}`,
+    });
+    return true;
+  }
+  return false;
+};
 
-// 狀態更新
+// 訂單操作
 const markAsShipped = async (orderId) => {
   const orderRef = doc(db, "orders", orderId);
   await updateDoc(orderRef, {
@@ -208,12 +241,11 @@ const filteredPending = computed(() => filterByName(pendingOrders.value));
 const filteredShipped = computed(() => filterByName(shippedOrders.value));
 const filteredCompleted = computed(() => filterByName(completedOrders.value));
 
-// 登出功能
+// 登出
 const logout = async () => {
   try {
-    const auth = getAuth();
     await signOut(auth);
-    localStorage.removeItem("authToken"); // ✅ 清除 token
+    localStorage.removeItem("authToken");
     router.push("/login");
   } catch (err) {
     console.error("登出失敗", err);
