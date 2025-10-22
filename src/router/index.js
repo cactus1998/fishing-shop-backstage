@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import { auth } from "../firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 const routes = [
   { path: "/login", component: () => import("../views/Login.vue") },
@@ -15,23 +15,14 @@ const router = createRouter({
   routes,
 });
 
-// 🔥 Firebase 登入狀態監聽（僅驗證 Token）
+// Firebase 登入狀態監聽（僅更新 Token,不做跳轉）
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // ✅ 儲存 token
-    const token = user.accessToken || (await user.getIdToken());
+    // 儲存 token
+    const token = await user.getIdToken();
     localStorage.setItem("authToken", token);
-
-    // 若目前不在 dashboard，自動導向
-    if (router.currentRoute.value.path !== "/dashboard") {
-      router.push("/dashboard");
-    }
   } else {
-    // 未登入 → 清除 token 並導回登入頁
     localStorage.removeItem("authToken");
-    if (router.currentRoute.value.path !== "/login") {
-      router.push("/login");
-    }
   }
 });
 

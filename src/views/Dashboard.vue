@@ -1,21 +1,30 @@
 <template>
   <div class="flex flex-col items-center min-h-screen bg-gray-200 p-6">
 
-    <!-- 頁首 -->
-    <div class="flex items-center w-full justify-between mb-10">
-      <div class="w-[90px]"></div>
-      <h1 class="text-3xl font-semibold text-gray-800 text-center flex-1">
-        後台訂單管理
-      </h1>
-      <el-button
-        type="info"
-        plain
-        @click="logout"
-        class="w-[90px]"
-      >
-        登出
-      </el-button>
-    </div>
+<!-- 頁首 -->
+<div class="flex items-center w-full justify-between mb-6 sm:mb-10 sm:px-0">
+  <!-- 左側占位 -->
+  <div class="w-[70px] sm:w-[90px]"></div>
+
+  <!-- 標題 -->
+  <h1 class="text-xl sm:text-3xl font-semibold text-gray-800 text-center flex-1">
+    後台訂單管理
+  </h1>
+
+  <!-- 登出按鈕（固定在右側） -->
+  <div class="w-[70px] sm:w-[90px] flex justify-end">
+    <el-button
+      type="info"
+      plain
+      @click="logout"
+      class="text-sm sm:text-base"
+    >
+      登出
+    </el-button>
+  </div>
+</div>
+
+
 
     <!-- 訂單卡片 -->
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-5xl p-6">
